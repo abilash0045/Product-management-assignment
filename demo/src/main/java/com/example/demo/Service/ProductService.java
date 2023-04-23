@@ -98,7 +98,7 @@ public class ProductService {
 
         if (updateEntryDTO.getProductCategory() != null && productEntity.getProductCategory().equals(ProductCategory.MOBILE)){
 
-            MobilePhoneEntity mobilePhoneEntity = mobileRepository.findById(updateEntryDTO.getId()).get();
+            MobilePhoneEntity mobilePhoneEntity = productEntity.getMobilePhoneEntity();
 
             mobilePhoneEntity.setRAM(updateEntryDTO.getRAM());
             mobilePhoneEntity.setModel(updateEntryDTO.getModel());
@@ -114,7 +114,7 @@ public class ProductService {
 
         else if (updateEntryDTO.getProductCategory() != null && productEntity.getProductCategory().equals(ProductCategory.SHOE)) {
 
-            ShoeEntity shoeEntity = shoeRepository.findById(updateEntryDTO.getId()).get();
+            ShoeEntity shoeEntity = productEntity.getShoeEntity();
 
             shoeEntity.setShoeStyle(updateEntryDTO.getShoeStyle());
             shoeEntity.setSize(updateEntryDTO.getSize());
@@ -124,7 +124,7 @@ public class ProductService {
        }
 
         else if (updateEntryDTO.getProductCategory() != null && productEntity.getProductCategory().equals(ProductCategory.CLOTHING)) {
-            ClothingEntity clothingEntity = clothingRepository.findById(updateEntryDTO.getId()).get();
+            ClothingEntity clothingEntity = productEntity.getClothingEntity();
 
             clothingEntity.setClothingType(updateEntryDTO.getClothingType());
             clothingEntity.setSize(updateEntryDTO.getSize());

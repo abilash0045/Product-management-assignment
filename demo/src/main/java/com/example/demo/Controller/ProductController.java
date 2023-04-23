@@ -40,7 +40,7 @@ public class ProductController {
         try {
             response = productService.updateProduct(updateEntryDTO);
         } catch (Exception e) {
-            throw new RuntimeException("invalid request");
+            throw new RuntimeException(e);
         }
 
         return new ResponseEntity(response, HttpStatus.ACCEPTED);
