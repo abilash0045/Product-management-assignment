@@ -10,13 +10,9 @@ import javax.persistence.*;
 @Entity
 @Table(name = "mobiles")
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MobilePhoneEntity {
-
-    @Id
-    private int id;
+public class MobilePhoneEntity extends ProductEntity{
 
     private String model;
 
@@ -30,7 +26,4 @@ public class MobilePhoneEntity {
 
     private int cameraResolution;
 
-    @OneToOne
-    @JoinColumn
-    private ProductEntity productEntity;
 }

@@ -11,20 +11,15 @@ import javax.persistence.*;
 @Entity
 @Table(name = "shoes")
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ShoeEntity {
-
-    @Id
-    private int id;
+public class ShoeEntity extends ProductEntity{
 
     private int size;
+    private String material;
+    private String occasion;
 
     @Enumerated(value = EnumType.STRING)
     private ShoeStyle shoeStyle;
 
-    @OneToOne
-    @JoinColumn
-    private ProductEntity productEntity;
 }

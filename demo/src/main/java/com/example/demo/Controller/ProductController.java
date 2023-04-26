@@ -1,16 +1,20 @@
 package com.example.demo.Controller;
 
-
 import com.example.demo.Dtos.ProductEntryDTO;
-import com.example.demo.Dtos.UpdateEntryDTO;
-import com.example.demo.Entities.ProductEntity;
+import com.example.demo.Dtos.ProductResponseDto;
 import com.example.demo.Service.ProductService;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
+
+/*In this approach we can add different products with different or same categories with similar properties by calling add product Api,
+  but if the product have extra properties like for mobile --> ram, storage, etc, we can easily create add api for mobile.
+ */
 
 @RestController
 @RequestMapping("/product")
@@ -20,11 +24,11 @@ public class ProductController {
     ProductService productService;
 
     @PostMapping("/add")
-    public ResponseEntity addProduct(@RequestBody ProductEntryDTO productEntryDTO){
+    public ResponseEntity addProduct(@RequestBody ProductEntryDTO productEntityDTO){
 
         String response = null;
         try {
-            response = productService.addProduct(productEntryDTO);
+            response = productService.addProduct(productEntityDTO);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -33,12 +37,12 @@ public class ProductController {
     }
 
     @PutMapping("/update")
-    public ResponseEntity updateProduct(@RequestBody UpdateEntryDTO updateEntryDTO){
+    public ResponseEntity updateProduct(@RequestParam int id, @RequestBody ProductEntryDTO productEntryDTO){
 
         String response = null;
 
         try {
-            response = productService.updateProduct(updateEntryDTO);
+            response = productService.updateProduct(id,productEntryDTO);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -55,17 +59,19 @@ public class ProductController {
     }
 
     @GetMapping("/getProduct")
+    @JsonIgnore
     public ResponseEntity getProduct(@RequestParam int productId) {
 
-        ProductEntity response = productService.getProduct(productId);
+        ProductResponseDto response = productService.getProduct(productId);
 
         return new ResponseEntity(response, HttpStatus.CREATED);
     }
 
     @GetMapping("/getAllProduct")
+    @JsonIgnore
     public ResponseEntity getAllProducts() {
 
-        List<ProductEntity> response = productService.getAllProducts();
+        List<ProductResponseDto> response = productService.getAllProducts();
 
         return new ResponseEntity(response, HttpStatus.CREATED);
     }

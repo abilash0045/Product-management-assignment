@@ -1,18 +1,13 @@
 package com.example.demo.Service;
 
 import com.example.demo.Dtos.ProductEntryDTO;
-import com.example.demo.Dtos.UpdateEntryDTO;
-import com.example.demo.Entities.ClothingEntity;
-import com.example.demo.Entities.MobilePhoneEntity;
-import com.example.demo.Entities.ProductEntity;
-import com.example.demo.Entities.ShoeEntity;
-import com.example.demo.Enums.ProductCategory;
-import com.example.demo.Repository.ClothingRepository;
-import com.example.demo.Repository.MobileRepository;
-import com.example.demo.Repository.ProductRepository;
-import com.example.demo.Repository.ShoeRepository;
+import com.example.demo.Dtos.ProductResponseDto;
+import com.example.demo.Entities.*;
+import com.example.demo.Repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -22,6 +17,12 @@ public class ProductService {
     ProductRepository productRepository;
 
     @Autowired
+    CategoryRepository categoryRepository;
+
+    @Autowired
+    CategoryService categoryService;
+
+    @Autowired
     MobileRepository mobileRepository;
     @Autowired
     ShoeRepository shoeRepository;
@@ -29,111 +30,55 @@ public class ProductService {
     ClothingRepository clothingRepository;
 
 
-    public String addProduct(ProductEntryDTO productEntryDTO) throws Exception{
+    public String addProduct(ProductEntryDTO productEntityDTO) throws Exception{
 
-        System.out.println(productEntryDTO.toString());
-
-        ProductEntity productEntity = ProductEntity.builder().productName(productEntryDTO.getProductName())
-                .description(productEntryDTO.getDescription())
-                .price(productEntryDTO.getPrice())
-                .productCategory(productEntryDTO.getProductCategory())
-                .brand(productEntryDTO.getBrand())
-                .color(productEntryDTO.getColor())
-                .build();
-
-        if (productEntryDTO.getProductCategory() != null && (productEntryDTO.getProductCategory()).equals(ProductCategory.MOBILE)){
-            MobilePhoneEntity mobilePhoneEntity = MobilePhoneEntity.builder().model(productEntryDTO.getModel())
-                    .id(productEntity.getProductId())
-                    .RAM(productEntryDTO.getRAM())
-                    .model(productEntryDTO.getModel())
-                    .storage(productEntryDTO.getStorage())
-                    .cameraResolution(productEntryDTO.getCameraResolution())
-                    .operatingSystem(productEntryDTO.getOperatingSystem()).build();
-            productEntity.setMobilePhoneEntity(mobilePhoneEntity);
-            mobilePhoneEntity.setProductEntity(productEntity);
-
+        Category category;
+//        if (categoryRepository.existsById(productEntity.getCategory().getId())){
+//            category = categoryRepository.findById(productEntity.getCategory().getId()).get();
+//        }
+        if (categoryRepository.findByName(productEntityDTO.getCategory())!=null){
+            category = categoryRepository.findByName(productEntityDTO.getCategory());
+        }
+        else{
+            category = categoryService.addCategory(productEntityDTO.getCategory());
         }
 
-        else if (productEntryDTO.getProductCategory() != null && productEntryDTO.getProductCategory().equals(ProductCategory.SHOE)) {
-            ShoeEntity shoeEntity = ShoeEntity.builder()
-                    .id(productEntity.getProductId())
-                    .shoeStyle(productEntryDTO.getShoeStyle())
-                    .size(productEntryDTO.getSize())
-                    .build();
-            productEntity.setShoeEntity(shoeEntity);
-            shoeEntity.setProductEntity(productEntity);
+        ProductEntity productEntity = ProductEntity.builder()
+                .brand(productEntityDTO.getBrand())
+                .color(productEntityDTO.getColor())
+                .quantity(productEntityDTO.getQuantity())
+                .productName(productEntityDTO.getProductName())
+                .description(productEntityDTO.getDescription())
+                .price(productEntityDTO.getPrice()).build();
 
-        }
+        List<ProductEntity> productEntities = category.getProducts();
+        productEntities.add(productEntity);
+        category.setProducts(productEntities);
 
-        else if (productEntryDTO.getProductCategory() != null && productEntryDTO.getProductCategory().equals(ProductCategory.CLOTHING)) {
-            ClothingEntity clothingEntity = ClothingEntity.builder()
-                    .id(productEntity.getProductId())
-                    .clothingType(productEntryDTO.getClothingType())
-                    .size(productEntryDTO.getSize())
-                    .build();
-            productEntity.setClothingEntity(clothingEntity);
-            clothingEntity.setProductEntity(productEntity);
-        }
+//        category = categoryRepository.save(category);
 
-        productRepository.save(productEntity);
+        productEntity.setCategory(category);
+
+        categoryRepository.save(category);
 
         return "Product added successfully";
 
     }
 
-    public String updateProduct(UpdateEntryDTO updateEntryDTO) throws Exception{
+    public String updateProduct(int id, ProductEntryDTO productEntryDTO) throws Exception{
 
-        ProductEntity productEntity = productRepository.findById(updateEntryDTO.getId()).get();
+        ProductEntity product = productRepository.findById(id).get();
+        Category category = product.getCategory();
 
-        if (productEntity == null){
-            throw new Exception("Product not found");
-        }
+        product.setProductName(productEntryDTO.getProductName());
+        product.setBrand(productEntryDTO.getBrand());
+        product.setColor(productEntryDTO.getColor());
+        product.setPrice(productEntryDTO.getPrice());
+        product.setQuantity(productEntryDTO.getQuantity());
+        product.setDescription(productEntryDTO.getDescription());
 
-        productEntity.setProductCategory(updateEntryDTO.getProductCategory());
-        productEntity.setProductName(updateEntryDTO.getProductName());
-        productEntity.setBrand(updateEntryDTO.getBrand());
-        productEntity.setColor(updateEntryDTO.getColor());
-        productEntity.setDescription(updateEntryDTO.getDescription());
-        productEntity.setPrice(updateEntryDTO.getPrice());
+        categoryRepository.save(category);
 
-        if (updateEntryDTO.getProductCategory() != null && productEntity.getProductCategory().equals(ProductCategory.MOBILE)){
-
-            MobilePhoneEntity mobilePhoneEntity = productEntity.getMobilePhoneEntity();
-
-            mobilePhoneEntity.setRAM(updateEntryDTO.getRAM());
-            mobilePhoneEntity.setModel(updateEntryDTO.getModel());
-            mobilePhoneEntity.setStorage(updateEntryDTO.getStorage());
-            mobilePhoneEntity.setCameraResolution(updateEntryDTO.getCameraResolution());
-            mobilePhoneEntity.setOperatingSystem(updateEntryDTO.getOperatingSystem());
-            mobilePhoneEntity.setScreenSize(updateEntryDTO.getScreenSize());
-
-            productEntity.setMobilePhoneEntity(mobilePhoneEntity);
-            mobilePhoneEntity.setProductEntity(productEntity);
-
-        }
-
-        else if (updateEntryDTO.getProductCategory() != null && productEntity.getProductCategory().equals(ProductCategory.SHOE)) {
-
-            ShoeEntity shoeEntity = productEntity.getShoeEntity();
-
-            shoeEntity.setShoeStyle(updateEntryDTO.getShoeStyle());
-            shoeEntity.setSize(updateEntryDTO.getSize());
-
-            productEntity.setShoeEntity(shoeEntity);
-            shoeEntity.setProductEntity(productEntity);
-       }
-
-        else if (updateEntryDTO.getProductCategory() != null && productEntity.getProductCategory().equals(ProductCategory.CLOTHING)) {
-            ClothingEntity clothingEntity = productEntity.getClothingEntity();
-
-            clothingEntity.setClothingType(updateEntryDTO.getClothingType());
-            clothingEntity.setSize(updateEntryDTO.getSize());
-
-            productEntity.setClothingEntity(clothingEntity);
-            clothingEntity.setProductEntity(productEntity);
-        }
-
-        productRepository.save(productEntity);
         return "Product updated successfully";
     }
 
@@ -143,15 +88,43 @@ public class ProductService {
         return "Product deleted successfully";
     }
 
-    public ProductEntity getProduct(int productId) {
+    public ProductResponseDto getProduct(int productId) {
 
-        return productRepository.findById(productId).get();
+        ProductEntity product = productRepository.findById(productId).get();
+
+        ProductResponseDto productResponseDto = ProductResponseDto.builder()
+                .productId(product.getProductId())
+                .productName(product.getProductName())
+                .brand(product.getBrand())
+                .color(product.getColor())
+                .price(product.getPrice())
+                .description(product.getDescription())
+                .quantity(product.getQuantity())
+                .Category(product.getCategory().getProductCategory()).build();
+
+        return productResponseDto;
     }
 
-    public List<ProductEntity> getAllProducts() {
+    public List<ProductResponseDto> getAllProducts() {
 
         List<ProductEntity> productEntities = productRepository.findAll();
 
-        return productEntities;
+        List<ProductResponseDto> productResponseDtos = new ArrayList<>();
+
+        for (ProductEntity product : productEntities){
+            ProductResponseDto productResponseDto = ProductResponseDto.builder()
+                    .productId(product.getProductId())
+                    .productName(product.getProductName())
+                    .brand(product.getBrand())
+                    .color(product.getColor())
+                    .price(product.getPrice())
+                    .description(product.getDescription())
+                    .quantity(product.getQuantity())
+                    .Category(product.getCategory().getProductCategory()).build();
+
+            productResponseDtos.add(productResponseDto);
+        }
+
+        return productResponseDtos;
     }
 }

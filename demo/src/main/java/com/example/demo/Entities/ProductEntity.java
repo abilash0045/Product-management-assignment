@@ -1,6 +1,5 @@
 package com.example.demo.Entities;
 
-import com.example.demo.Enums.ProductCategory;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,6 +11,7 @@ import javax.persistence.*;
 @Entity
 @Data
 @Table(name = "products")
+@Inheritance(strategy = InheritanceType.JOINED)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -29,17 +29,12 @@ public class ProductEntity {
 
     private String color;
 
+    private int quantity;
+
     private String brand;
 
-    @Enumerated(value = EnumType.STRING)
-    private ProductCategory productCategory;
+    @ManyToOne
+    @JoinColumn
+    private Category category;
 
-    @OneToOne(mappedBy = "productEntity", cascade = CascadeType.ALL)
-    private MobilePhoneEntity mobilePhoneEntity;
-
-    @OneToOne(mappedBy = "productEntity", cascade = CascadeType.ALL)
-    private ShoeEntity shoeEntity;
-
-    @OneToOne(mappedBy = "productEntity",cascade = CascadeType.ALL)
-    private ClothingEntity clothingEntity;
 }
